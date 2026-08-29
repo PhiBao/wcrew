@@ -359,3 +359,6 @@ hr{border:none; border-top:1px solid var(--border); margin:0}
 }
 .agent-result{max-height:200px; overflow:auto; background:#0b1220; color:#e2e8f0; border-radius:10px; padding:10px 12px; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:11px; white-space:pre-wrap; word-break:break-word}
 .agent-result.muted-err{background:#1c1917; color:#fca5a5}
+
+/* ensure the hidden attribute always wins over display:flex/grid */
+[hidden]{display:none !important}

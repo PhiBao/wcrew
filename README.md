@@ -10,7 +10,7 @@ wcrew is built for the independent shop that still builds the roster on Sunday n
 
 ![wcrew board](docs/hero.png)
 
-> Screenshot: weekly board with compliance + cost + agent-proposed auto-fill preview. Replace with your own capture after `pnpm dev` if needed — no placeholder image ships to judges.
+> Weekly board with compliance + cost + an agent-proposed auto-fill preview.
 
 ---
 
@@ -84,7 +84,7 @@ await document.modelContext.registerTool({
 
 ## Demo (3-minute video)
 
-> Replace with your YouTube link before submission.
+> [Youtube video demo](https://youtu.be/RvHgdvq_928)
 
 **Script to cover:**
 
@@ -96,8 +96,6 @@ await document.modelContext.registerTool({
 6. Show Undo, CSV/ICS export, and that a human can still assign via the grid — same store, same rules.
 
 Test in **ChatGPT’s in-app browser** (WebMCP native) or **Chrome 149+** with `chrome://flags/#enable-webmcp-testing` → Enabled + [Model Context Tool Inspector](https://chromewebstore.google.com/detail/model-context-tool-inspec/gbpdfapgefenggkahomfgkhfehlcenpd) extension. No flag handy? Open the **Agent console** (bottom-right) — it runs the same tools in any browser.
-
-Full submission copy (text description + testing instructions): [`docs/DEVPOST.md`](docs/DEVPOST.md).
 
 ---
 
@@ -145,7 +143,24 @@ tools/
 
 ## Why not another shop?
 
-The WebMCP showcase already has Verdant Market (grocery), pizza-maker, flight search, French bistro, CineFlow, AcmeBank. wcrew avoids commerce and leans into **operations + compliance + repeated weekly habit** — where WebMCP’s “human sees every agent act and can take it back” is load-bearing, not decorative.
+The WebMCP showcase already has Verdant Market (grocery), pizza-maker, flight search, French bistro, CineFlow, AcmeBank. wcrew avoids commerce and leans into **operations + compliance + repeated weekly habit** — where WebMCP's "human sees every agent act and can take it back" is load-bearing, not decorative.
+
+## Roadmap & go-to-market
+
+**The wedge.** Specialty coffee and small retail are the beachhead — owners who care about craft, already live in group texts, and feel labour-law exposure (minors, rest breaks, fair-scheduling) acutely. They *want* to offload the Sunday roster; they just won't trust a black box to do it. That's exactly what WebMCP unlocks.
+
+**Distribution.** Not ads — the roster itself. Publishing sends every staff member their schedule, a shareable artifact that reaches other managers. Owner communities (coffee forums, small-biz Slack/Discord, POS marketplaces) are the funnel. Every published roster is a referral.
+
+**Retention loop.** The schedule is a *weekly habit*. Compliance and the trust contract compound: the longer a shop runs wcrew, the more their availability, rules, and history live in it, and the harder it is to go back to Excel.
+
+**Why it's defensible.** The moat isn't the solver — it's the trust contract (agent acts, human sees and undoes) plus the accumulating roster history. A generic agent chat can't fake "observable, attributable, undoable" in a labour context.
+
+**Roadmap:**
+1. **Teams & persistence** — auth, multi-manager sharing, real storage (the demo is `localStorage` by design).
+2. **Staff self-service** — employees ask the agent to swap, managers approve.
+3. **Publish → notify** — SMS/email + per-person ICS the moment the roster goes live.
+4. **Labour-law templates** — pluggable regional rule packs so the compliance engine scales beyond one jurisdiction.
+5. **POS integrations** — pull real demand from Square/Toast to shape the weekly template.
 
 ---
 
