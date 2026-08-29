@@ -1,6 +1,6 @@
 # wcrew — shift roster co-pilot
 
-**Live demo:** `https://wcrew.pages.dev` *(after Cloudflare Pages connect — see Deploy below)* · **Repo:** https://github.com/PhiBao/wcrew
+**Live demo:** https://wcrew.pages.dev · **Repo:** https://github.com/PhiBao/wcrew
 
 **An agent-ready shift scheduler where manager and agent fix next week’s roster together.**
 
