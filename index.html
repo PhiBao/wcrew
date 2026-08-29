@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>wcrew — shift roster co-pilot</title>
+  <meta name="description" content="wcrew — an agent-ready shift scheduler. Manager and agent fix the weekly roster together, with compliance, cost and coverage you can see." />
+  <meta name="color-scheme" content="light" />
+  <link rel="stylesheet" href="src/styles.css?v=9" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><rect width='36' height='36' rx='10' fill='%23111827'/><text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-family='Inter,system-ui' font-weight='800' font-size='13' fill='white'>wc</text></svg>">
+</head>
+<body>
+  <!-- top -->
+  <header class="top">
+    <div class="top-inner">
+      <div class="brand">
+        <div class="mark" aria-hidden="true">wc</div>
+        <div style="min-width:0">
+          <h1>wcrew</h1>
+          <p id="orgLine">Rosewater Coffee · Wharf St — <span id="weekLine">—</span></p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <span id="webmcpPill" class="pill" title="WebMCP tool status"><span class="dot" style="background:#a8a29e"></span> checking WebMCP…</span>
+        <span id="publishPill" class="pill pill--draft"><span class="dot"></span> draft</span>
+        <button id="btnUndo" class="btn btn--small" type="button" aria-label="Undo last change">↩ Undo</button>
+        <button id="btnRedo" class="btn btn--small" type="button" aria-label="Redo">↪ Redo</button>
+        <button id="btnExportCsv" class="btn btn--small" type="button">Export CSV</button>
+        <button id="btnExportIcs" class="btn btn--small" type="button">Export ICS</button>
+        <button id="btnReset" class="btn btn--ghost btn--small" type="button" title="Reset week to seed">Reset</button>
+      </div>
+    </div>
+    <div class="strip" id="strip"></div>
+  </header>
+
+  <div class="shell">
+    <div class="layout">
+      <!-- staff -->
+      <aside class="col col--staff" style="display:grid; gap:16px">
+        <section class="card" aria-labelledby="teamH">
+          <div class="card-hd">
+            <h2 id="teamH">Team <small id="teamCount">—</small></h2>
+            <span class="muted" style="font-size:11px">tap a name to filter</span>
+          </div>
+          <div class="card-bd"><div id="staffList" class="staff-list"></div></div>
+        </section>
+
+        <section class="card" aria-labelledby="explainH">
+          <div class="card-hd"><h2 id="explainH">Test an assignment</h2></div>
+          <div class="card-bd" style="display:grid; gap:10px">
+            <div class="field">
+              <label for="explainShift">Shift</label>
+              <select id="explainShift" class="select"></select>
+            </div>
+            <div class="field">
+              <label for="explainStaff">Staff</label>
+              <select id="explainStaff" class="select"></select>
+            </div>
+            <button id="btnExplain" class="btn btn--small" type="button">Explain assignment</button>
+            <div id="explainOut" class="muted" style="font-size:12px; line-height:1.5; border:1px solid var(--border); border-radius:10px; padding:10px; background:var(--surface-2); min-height:44px">Pick a shift + person to see blockers &amp; overtime before you assign.</div>
+          </div>
+        </section>
+      </aside>
+
+      <!-- roster -->
+      <main class="col col--roster" style="display:grid; gap:16px">
+        <section class="card">
+          <div class="card-bd">
+            <div class="roster-head">
+              <div class="grow" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+                <label class="sr" for="strategySelect">Strategy</label>
+                <select id="strategySelect" class="select" style="min-width:170px">
+                  <option value="balance_hours">balance_hours — spread evenly</option>
+                  <option value="minimize_cost">minimize_cost — cheapest</option>
+                  <option value="respect_preferences">respect_preferences — honor days off</option>
+                </select>
+                <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; cursor:pointer">
+                  <input id="dryRun" type="checkbox" checked /> dry run
+                </label>
+                <button id="btnAutoFill" class="btn btn--primary btn--small" type="button">Auto-fill open shifts</button>
+              </div>
+              <button id="btnPublish" class="btn btn--primary" type="button">Publish roster</button>
+            </div>
+            <div id="previewSlot"></div>
+            <div id="gridHint" style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:10px; font-size:11px; color:var(--muted); background:var(--surface-2); border:1px solid var(--border); padding:6px 8px; border-radius:8px">
+              <span>← drag to see Fri–Sun → &nbsp; <span class="muted" style="font-size:10px">7 days, 39 shifts</span></span>
+              <span style="display:flex; gap:6px">
+                <button id="btnScrollLeft" type="button" class="btn btn--small" style="padding:4px 8px; font-size:11px" aria-label="Scroll left">‹</button>
+                <button id="btnScrollRight" type="button" class="btn btn--small" style="padding:4px 8px; font-size:11px" aria-label="Scroll right">›</button>
+              </span>
+            </div>
+            <div class="grid-wrap" id="gridWrap" style="margin-top:8px"><div id="rosterGrid" class="grid"></div></div>
+            <p class="muted" style="margin:10px 0 0; font-size:11px">Click a shift to assign, see swaps, or lock it from auto-fill. Open shifts are dashed. <b style="color:var(--text)">Agent tip:</b> ask your browser agent “cover late bar Thu–Fri under budget and respect Maya’s prefs” — it will call <code>auto_fill</code> dry-run, show the plan here, then ask to apply.</p>
+          </div>
+        </section>
+      </main>
+
+      <!-- inspector -->
+      <aside class="col col--inspector" style="display:grid; gap:16px; align-content:start">
+        <section class="card" aria-labelledby="compH">
+          <div class="card-hd"><h2 id="compH">Compliance <small id="compBadge">—</small></h2><span id="publishHint" class="muted" style="font-size:11px"></span></div>
+          <div class="card-bd"><div id="complianceList" style="display:grid; gap:8px"></div></div>
+        </section>
+
+        <section class="card" aria-labelledby="costH">
+          <div class="card-hd"><h2 id="costH">Labour cost</h2><span id="costHead" class="pill" style="font-size:11px">—</span></div>
+          <div class="card-bd">
+            <div id="costBody" class="kv"></div>
+            <div class="sep"></div>
+            <div id="costByStaff" style="display:grid; gap:6px"></div>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="actH">
+          <div class="card-hd"><h2 id="actH">Activity</h2><span class="muted" style="font-size:11px">agent + human, undoable</span></div>
+          <div class="card-bd"><div id="activity" class="activity"></div></div>
+        </section>
+      </aside>
+    </div>
+
+    <footer style="margin-top:18px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between; color:var(--muted); font-size:11px; border-top:1px solid var(--border); padding-top:14px">
+      <span>wcrew is agent-ready via <code>document.modelContext</code> (WebMCP). 15 tools: <code>get_roster</code> <code>check_compliance</code> <code>auto_fill</code> <code>assign_shift</code> <code>publish_roster</code> … Try the Model Context Tool Inspector extension or ChatGPT’s in-app browser.</span>
+      <span><a href="https://github.com/webmachinelearning/webmcp" target="_blank" rel="noreferrer">WebMCP spec</a> · <span id="buildInfo"></span></span>
+    </footer>
+  </div>
+
+  <!-- shift dialog -->
+  <dialog id="shiftDialog" aria-labelledby="shiftTitle">
+    <div class="dlg-hd">
+      <div>
+        <h3 id="shiftTitle">Shift</h3>
+        <p id="shiftSub" class="muted" style="margin:4px 0 0; font-size:12px"></p>
+      </div>
+      <button class="btn btn--small" type="button" onclick="this.closest('dialog').close()">✕</button>
+    </div>
+    <div class="dlg-bd">
+      <div id="shiftDetail" style="display:grid; gap:12px"></div>
+      <div class="grid2">
+        <div class="field">
+          <label for="shiftAssignSelect">Assign to</label>
+          <select id="shiftAssignSelect" class="select"></select>
+          <span id="assignHint" class="muted" style="font-size:11px"></span>
+        </div>
+        <div class="field">
+          <label>&nbsp;</label>
+          <div style="display:flex; gap:8px; flex-wrap:wrap">
+            <button id="btnShiftAssign" class="btn btn--primary btn--small" type="button">Assign</button>
+            <button id="btnShiftUnassign" class="btn btn--small" type="button">Unassign</button>
+            <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600"><input id="shiftLock" type="checkbox" /> Locked</label>
+          </div>
+        </div>
+      </div>
+      <div id="swapBox" style="display:grid; gap:8px"></div>
+    </div>
+    <div class="dlg-ft">
+      <button type="button" class="btn btn--small" onclick="this.closest('dialog').close()">Close</button>
+    </div>
+  </dialog>
+
+  <!-- confirm dialog (used by WebMCP + human publish/reset) -->
+  <dialog id="confirmDialog" aria-labelledby="confirmTitle">
+    <div class="dlg-hd"><h3 id="confirmTitle">Confirm</h3><button class="btn btn--small" type="button" onclick="this.closest('dialog').close('cancel')">✕</button></div>
+    <div class="dlg-bd"><p id="confirmBody" style="margin:0; white-space:pre-wrap"></p></div>
+    <div class="dlg-ft">
+      <button id="confirmCancel" type="button" class="btn btn--small">Cancel</button>
+      <button id="confirmOk" type="button" class="btn btn--primary btn--small">Approve</button>
+    </div>
+  </dialog>
+
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

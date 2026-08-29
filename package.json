@@ -1,0 +1,15 @@
+{
+  "name": "wcrew",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "wcrew — an agent-ready shift scheduler for small teams, built on WebMCP (document.modelContext).",
+  "scripts": {
+    "dev": "node tools/serve.mjs 8788",
+    "start": "node tools/serve.mjs 8788",
+    "verify": "node tools/verify.mjs",
+    "engine:test": "node tools/engine.test.mjs"
+  },
+  "engines": { "node": ">=20" },
+  "packageManager": "pnpm@9.12.0"
+}
