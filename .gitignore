@@ -5,4 +5,8 @@ dist/
 .wrangler/
 .dev.vars
 
-.opencode/plans/
+.opencode/
+AGENTS.md
+FOUNDER.md
+opencode.alt.json
+opencode.json
