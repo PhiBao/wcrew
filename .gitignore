@@ -10,7 +10,6 @@ AGENTS.md
 FOUNDER.md
 opencode.alt.json
 opencode.json
-# demo video is 7M — keep thumb+captions in repo, upload mp4 to YouTube manually
+# demo video + capture tooling — keep out of the public repo, upload mp4 to YouTube manually
 docs/*.mp4
-video/frames/
-video/clips/
+video/
