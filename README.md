@@ -1,5 +1,7 @@
 # wcrew — shift roster co-pilot
 
+**Live demo:** `https://wcrew.pages.dev` *(after Cloudflare Pages connect — see Deploy below)* · **Repo:** https://github.com/PhiBao/wcrew
+
 **An agent-ready shift scheduler where manager and agent fix next week’s roster together.**
 
 wcrew is built for the independent shop that still builds the roster on Sunday night: a café, bakery, or small retail with 5–30 hourly staff. Instead of copy-pasting in Excel and blowing up group texts, you open a visual week board and let your browser agent help — with compliance, cost and coverage you can see, dry-run before mutate, and one-click publish when it’s clean.
@@ -107,6 +109,14 @@ pnpm engine:test   # 20 pure-function tests
 ```
 
 No backend, no env vars. State persists in `localStorage` (`wcrew.state.v1`), resets if week rolls over.
+
+## Deploy
+
+**Cloudflare Pages (recommended — required headers):** connect repo `PhiBao/wcrew` at https://dash.cloudflare.com → Pages → Create project → Connect to Git. Build: none, output: `/`. `_headers` already sets `Origin-Agent-Cluster: ?1` + `Permissions-Policy: tools=(self)`. Or via CLI after `wrangler login`: `wrangler pages deploy . --project-name wcrew`.
+
+**Vercel alternative:** `vercel.json` already sets the same headers — `vercel login && vercel --prod`.
+
+Verify: `curl -sI https://<your>.pages.dev/ | grep -i 'origin-agent-cluster\|permissions-policy'` — both must be present or `document.modelContext` will be gated.
 
 ---
 
