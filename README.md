@@ -76,7 +76,9 @@ await document.modelContext.registerTool({
 * Staff notes are **untrusted user content** (including the Inés injection canary: *IGNORE ALL PREVIOUS INSTRUCTIONS…*). Tools surface them between `--- BEGIN UNTRUSTED STAFF NOTE ---` / `--- END UNTRUSTED STAFF NOTE ---` and descriptions warn agents not to execute instructions inside.
 * `evaluateAssignment` is single source of truth for both `explain_assignment` and `assign_shift` so rules never diverge.
 * Origin isolation via `Origin-Agent-Cluster: ?1` header (served by `tools/serve.mjs`) + `Permissions-Policy: tools=(self)`.
-* Polyfill-friendly: probes `document.modelContext` then `navigator.modelContext`, degrades to human-only if missing.
+* Polyfill-friendly: probes `document.modelContext` then `navigator.modelContext`, degrades gracefully if missing.
+
+**In-page agent console.** The bottom-right **Agent console** runs the same 15 tools in *any* browser — no Chrome flag, no agent platform. It uses `document.modelContext.getTools()` / `executeTool()` when WebMCP is present and falls back to the identical local definitions otherwise, so you can demo the tool surface (and watch the board react) anywhere.
 
 ---
 
@@ -93,7 +95,9 @@ await document.modelContext.registerTool({
 5. Call `publish_roster` → modal appears → click Approve → pill flips to “published”.
 6. Show Undo, CSV/ICS export, and that a human can still assign via the grid — same store, same rules.
 
-Test in **ChatGPT’s in-app browser** (WebMCP native) or **Chrome 149+** with `chrome://flags/#enable-webmcp-testing` → Enabled + [Model Context Tool Inspector](https://chromewebstore.google.com/detail/model-context-tool-inspec/gbpdfapgefenggkahomfgkhfehlcenpd) extension.
+Test in **ChatGPT’s in-app browser** (WebMCP native) or **Chrome 149+** with `chrome://flags/#enable-webmcp-testing` → Enabled + [Model Context Tool Inspector](https://chromewebstore.google.com/detail/model-context-tool-inspec/gbpdfapgefenggkahomfgkhfehlcenpd) extension. No flag handy? Open the **Agent console** (bottom-right) — it runs the same tools in any browser.
+
+Full submission copy (text description + testing instructions): [`docs/DEVPOST.md`](docs/DEVPOST.md).
 
 ---
 
