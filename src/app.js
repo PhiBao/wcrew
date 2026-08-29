@@ -544,24 +544,27 @@ store.subscribe(() => renderAll(store.peek()));
 // WebMCP registration
 let webmcpStatus = 'checking';
 let webmcpInFlight = false; // load event and the poll below can race — register once
+let toolDefs = []; // kept even when WebMCP is absent, for the in-page agent console
+let webmcpAvail = false;
 async function initWebMCP(){
   if (webmcpInFlight || webmcpStatus === 'ready') return;
   webmcpInFlight = true;
   const pill = $('#webmcpPill');
   try{
     const res = await registerWcrewTools(store);
+    toolDefs = res.defs || [];
+    webmcpAvail = !!res.registered?.length;
+    setupAgentConsole();
     if(res.registered?.length){
       pill.innerHTML = `<span class="dot" style="background:#0f766e"></span> WebMCP ✓ ${res.registered.length} tools`;
       pill.className = 'pill pill--live';
       pill.title = res.registered.join(', ');
       webmcpStatus = 'ready';
-    } else if(res.reason === 'no-modelContext'){
-      pill.innerHTML = `<span class="dot" style="background:#e7a012"></span> WebMCP not detected — human-only`;
-      pill.className = 'pill';
-      pill.title = 'Enable chrome://flags/#enable-webmcp-testing or use ChatGPT in-app browser';
-      webmcpStatus = 'missing';
     } else {
-      pill.textContent = 'WebMCP idle';
+      pill.innerHTML = `<span class="dot" style="background:#e7a012"></span> WebMCP off — agent console ready`;
+      pill.className = 'pill';
+      pill.title = 'Enable chrome://flags/#enable-webmcp-testing for a native browser agent, or use the agent console (bottom-right).';
+      webmcpStatus = 'missing';
     }
   } catch(e){
     console.error('[wcrew] WebMCP register failed', e);
@@ -588,3 +591,137 @@ const poll = setInterval(()=>{
 
 // expose for debugging / tests
 globalThis.__wcrew = { store, getState:()=>store.get(), coverage, costBreakdown, checkCompliance };
+
+// ---------------------------------------------------------------------------
+// In-page agent console — demonstrates the WebMCP tool surface in any browser.
+// Uses document.modelContext.getTools()/executeTool() when WebMCP is present,
+// otherwise calls the same local tool definitions directly.
+// ---------------------------------------------------------------------------
+const MUTATING = new Set(['assign_shift', 'auto_fill', 'publish_roster', 'reset_week', 'undo_last_change', 'redo_last_undo']);
+const DEFAULT_ARGS = {
+  explain_assignment: { shift_id: 'thu-bar-am', staff_id: 'amara' },
+  suggest_swaps: { shift_id: 'thu-bar-am' },
+  assign_shift: { shift_id: 'thu-bar-am', staff_id: 'dev' },
+  auto_fill: { strategy: 'balance_hours', dry_run: true },
+  export_roster: { format: 'csv' },
+  list_shifts: { role: 'bar' },
+};
+const PRESETS = [
+  { label: '▶ check compliance', tool: 'check_compliance', args: {} },
+  { label: '▶ preview auto-fill', tool: 'auto_fill', args: { strategy: 'balance_hours', dry_run: true } },
+  { label: '▶ explain a swap', tool: 'explain_assignment', args: { shift_id: 'thu-bar-am', staff_id: 'amara' } },
+  { label: '▶ roster overview', tool: 'get_roster', args: {} },
+];
+
+async function runToolByName(name, args) {
+  const mc = globalThis.document?.modelContext;
+  if (mc && typeof mc.executeTool === 'function') {
+    try {
+      const tools = await mc.getTools();
+      const t = tools.find((x) => x.name === name);
+      if (t) return await mc.executeTool(t, args);
+    } catch (e) {
+      console.warn('[wcrew] executeTool failed, falling back to local defs', e);
+    }
+  }
+  const def = toolDefs.find((d) => d.name === name);
+  if (!def) throw new Error(`unknown tool: ${name}`);
+  return await def.execute(args);
+}
+
+function toolResultText(res) {
+  const text = res?.content?.[0]?.text ?? JSON.stringify(res, null, 2);
+  try { return JSON.stringify(JSON.parse(text), null, 2); } catch { return String(text); }
+}
+
+function renderAgentPresets() {
+  $('#agentPresets').innerHTML = PRESETS.map((p) =>
+    `<button class="chip" data-tool="${esc(p.tool)}" data-args="${esc(JSON.stringify(p.args))}" type="button">${esc(p.label)}</button>`
+  ).join('');
+  $$('#agentPresets .chip').forEach((el) => el.addEventListener('click', () => {
+    openAgentTool(el.dataset.tool, JSON.parse(el.dataset.args));
+  }));
+}
+
+function renderAgentToolList() {
+  $('#agentToolList').innerHTML = toolDefs.map((d) => {
+    const kind = MUTATING.has(d.name) ? 'mut' : 'read';
+    return `<button class="agent-tool" data-tool="${esc(d.name)}" type="button">
+      <span class="name">${esc(d.name)}</span>
+      <span class="kind kind--${kind}">${kind === 'mut' ? 'mutating' : 'read'}</span>
+    </button>`;
+  }).join('');
+  $$('#agentToolList .agent-tool').forEach((el) => el.addEventListener('click', () => {
+    openAgentTool(el.dataset.tool);
+  }));
+}
+
+function openAgentTool(name, argsOverride) {
+  const def = toolDefs.find((d) => d.name === name);
+  if (!def) return;
+  const detail = $('#agentToolDetail');
+  detail.hidden = false;
+  const isMut = MUTATING.has(name);
+  const args = argsOverride ?? DEFAULT_ARGS[name] ?? {};
+  detail.innerHTML = `
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px">
+      <code style="font-size:12px; font-weight:700">${esc(name)}</code>
+      <span class="kind ${isMut ? 'kind--mut' : 'kind--read'}">${isMut ? 'mutating' : 'read-only'}</span>
+    </div>
+    <div class="desc">${esc(def.description)}</div>
+    <textarea id="agentArgs" spellcheck="false" aria-label="Tool arguments (JSON)">${esc(JSON.stringify(args, null, 2))}</textarea>
+    <div style="display:flex; gap:8px; align-items:center">
+      <button id="agentRun" class="btn btn--primary btn--small" type="button">Run tool</button>
+      <span class="muted" style="font-size:11px">${isMut ? 'may open a human-confirm modal' : 'safe — no mutation'}</span>
+    </div>
+    <div id="agentResult" hidden></div>`;
+  $('#agentRun').onclick = async () => {
+    let parsed;
+    try { parsed = JSON.parse($('#agentArgs').value || '{}'); }
+    catch (e) { return showAgentResult(null, new Error('invalid JSON: ' + e.message)); }
+    const btn = $('#agentRun');
+    btn.disabled = true; btn.textContent = 'Running…';
+    try {
+      const res = await runToolByName(name, parsed);
+      showAgentResult(res, null);
+    } catch (e) {
+      showAgentResult(null, e);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Run tool';
+    }
+  };
+}
+
+function showAgentResult(res, err) {
+  const box = $('#agentResult');
+  if (!box) return;
+  box.hidden = false;
+  if (err) {
+    box.className = 'agent-result muted-err';
+    box.textContent = 'Error: ' + (err?.message || String(err));
+    return;
+  }
+  box.className = 'agent-result';
+  box.textContent = toolResultText(res);
+  // a mutating tool likely changed the board — refresh
+  renderAll(store.peek());
+}
+
+function setupAgentConsole() {
+  if (!toolDefs.length) return;
+  const btn = $('#agentConsoleBtn');
+  const panel = $('#agentConsole');
+  const status = $('#agentConsoleStatus');
+  if (!btn || !panel || !status) return;
+
+  status.textContent = webmcpAvail
+    ? 'via document.modelContext (real WebMCP)'
+    : 'WebMCP flag not detected — using the same local tool defs';
+  btn.hidden = false;
+
+  btn.onclick = () => { panel.hidden = !panel.hidden; };
+  $('#agentConsoleClose').onclick = () => { panel.hidden = true; };
+
+  renderAgentPresets();
+  renderAgentToolList();
+}

@@ -167,6 +167,24 @@
     </div>
   </dialog>
 
+  <!-- agent console: run WebMCP tools in any browser, no flag needed -->
+  <button id="agentConsoleBtn" class="agent-console-btn" type="button" title="Open the WebMCP agent console">
+    <span class="dot" style="background:#0f766e"></span> Agent console
+  </button>
+  <div id="agentConsole" class="agent-console" hidden>
+    <div class="agent-console-hd">
+      <div style="min-width:0">
+        <b>Agent console</b>
+        <span id="agentConsoleStatus" class="muted" style="display:block; font-size:11px; font-weight:400">…</span>
+      </div>
+      <button id="agentConsoleClose" class="btn btn--small" type="button" aria-label="Close">✕</button>
+    </div>
+    <p class="muted" style="margin:0 0 10px; font-size:12px">These are the same <code>document.modelContext</code> tools a browser agent uses — pick one to call it and watch the board react.</p>
+    <div class="agent-presets" id="agentPresets"></div>
+    <div class="agent-tool-list" id="agentToolList"></div>
+    <div class="agent-tool-detail" id="agentToolDetail" hidden></div>
+  </div>
+
   <script type="module" src="src/app.js"></script>
 </body>
 </html>

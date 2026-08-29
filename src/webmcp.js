@@ -51,16 +51,21 @@ async function confirmWithUser(title, body) {
 // main registrar --------------------------------------------------------
 export async function registerWcrewTools(store, { signal } = {}) {
   const mc = globalThis.document?.modelContext ?? globalThis.navigator?.modelContext;
-  if (!mc || typeof mc.registerTool !== 'function') {
-    console.warn('[wcrew] WebMCP not available — running in human-only mode. Enable chrome://flags/#enable-webmcp-testing or ChatGPT in-app browser.');
-    return { registered: [], reason: 'no-modelContext' };
+  const hasWebMCP = mc && typeof mc.registerTool === 'function';
+  if (!hasWebMCP) {
+    console.warn('[wcrew] WebMCP not available — running in human-only mode (the in-page agent console still works). Enable chrome://flags/#enable-webmcp-testing or use ChatGPT in-app browser.');
   }
   const ac = new AbortController();
   if (signal) signal.addEventListener('abort', () => ac.abort(), { once: true });
 
   const tools = [];
+  // The same definitions are kept here regardless of WebMCP availability, so the
+  // in-page agent console can list and run them in any browser.
+  const defs = [];
 
   async function reg(def, opts = {}) {
+    defs.push(def);
+    if (!hasWebMCP) return null;
     const ctrl = new AbortController();
     ac.signal.addEventListener('abort', () => ctrl.abort(), { once: true });
     const handle = await mc.registerTool(def, { signal: ctrl.signal, ...opts });
@@ -461,5 +466,5 @@ export async function registerWcrewTools(store, { signal } = {}) {
   });
 
   console.log(`[wcrew] WebMCP: registered ${tools.length} tools: ${tools.join(', ')}`);
-  return { registered: tools };
+  return { registered: tools, defs };
 }
