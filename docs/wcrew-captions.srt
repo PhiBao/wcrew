@@ -1,140 +1,236 @@
 1
-00:00:00,050 --> 00:00:06,387
-Meet wcrew — a shift roster co-pilot where a café manager and a browser agent fix next week’s schedule together.
+00:00:00,050 --> 00:00:03,218
+Meet wcrew — a shift roster co-pilot where
+a café manager and a browser agent fix
 
 2
-00:00:06,387 --> 00:00:09,682
-For the independent shop that still builds the roster on Sunday night.
+00:00:03,298 --> 00:00:06,387
+next week’s schedule together.
 
 3
-00:00:09,794 --> 00:00:23,429
-Rostering is eight constraints at once: skills, availability, minors’ curfew, eleven hours rest, ten hours a day, five consecutive days, lead coverage, overtime at one-point-five, preferences, and a fifty-two hundred dollar budget.
+00:00:06,387 --> 00:00:09,682
+For the independent shop that still builds
+the roster on Sunday night.
 
 4
-00:00:23,429 --> 00:00:25,219
-Managers balance fairness.
+00:00:09,794 --> 00:00:14,338
+Rostering is eight constraints at once:
+skills, availability, minors’ curfew,
 
 5
+00:00:14,418 --> 00:00:18,883
+eleven hours rest, ten hours a day, five
+consecutive days, lead coverage, overtime
+
+6
+00:00:18,963 --> 00:00:23,428
+at one-point-five, preferences, and a
+fifty-two hundred dollar budget.
+
+7
+00:00:23,428 --> 00:00:25,219
+Managers balance fairness.
+
+8
 00:00:25,219 --> 00:00:26,724
 Agents balance speed.
 
-6
+9
 00:00:26,724 --> 00:00:28,736
 Together they’re better than either alone.
 
-7
+10
 00:00:28,850 --> 00:00:30,324
 Perfect for WebMCP.
 
-8
-00:00:30,324 --> 00:00:36,923
-Instead of an agent guessing through a dense grid, the site exposes fifteen typed tools on document dot modelContext.
-
-9
-00:00:36,924 --> 00:00:41,362
-The agent acts inside your live, authenticated tab — not a shadow backend.
-
-10
-00:00:41,362 --> 00:00:45,155
-Every change is observable, attributable, and undoable.
-
 11
+00:00:30,324 --> 00:00:33,623
+Instead of an agent guessing through a
+dense grid, the site exposes fifteen typed
+
+12
+00:00:33,703 --> 00:00:36,923
+tools on document dot modelContext.
+
+13
+00:00:36,923 --> 00:00:41,362
+The agent acts inside your live,
+authenticated tab — not a shadow backend.
+
+14
+00:00:41,362 --> 00:00:45,155
+Every change is observable, attributable,
+and undoable.
+
+15
 00:00:45,155 --> 00:00:46,819
 That’s the trust contract.
 
-12
-00:00:46,921 --> 00:00:50,823
-This is wcrew dot pages dot dev. Rosewater Coffee, Wharf Street.
+16
+00:00:46,920 --> 00:00:50,823
+This is wcrew dot pages dot dev. Rosewater
+Coffee, Wharf Street.
 
-13
+17
 00:00:50,823 --> 00:00:52,972
 Thirty-nine shifts, ten staff.
 
-14
-00:00:52,972 --> 00:00:58,704
-Left: the team with skills, contracted hours, and an untrusted note canary in Inés’s profile.
-
-15
-00:00:58,704 --> 00:01:01,956
-Center: the week board — dashed cards are open.
-
-16
-00:01:01,956 --> 00:01:05,960
-Top: coverage, labour cost with overtime, and the publish gate.
-
-17
-00:01:05,960 --> 00:01:10,070
-Right: compliance, cost breakdown, and the actor-tagged activity feed.
-
 18
-00:01:10,177 --> 00:01:20,275
-We ship with seeded errors so the first agent call finds something real: Kofi double-booked Thursday on bake and bar, Maya on a Sunday close against availability, plus coverage and lead warnings.
+00:00:52,972 --> 00:00:55,838
+Left: the team with skills, contracted
+hours, and an untrusted note canary in
 
 19
-00:01:20,378 --> 00:01:32,213
-The agent calls check_compliance, then suggest_swaps to rank who can take Thursday bar AM, then explain_assignment to preview blockers and caveats — all computed by the same pure engine the UI uses, not guessed.
+00:00:55,917 --> 00:00:58,704
+Inés’s profile.
 
 20
-00:01:32,329 --> 00:01:35,881
-For the bulk fix it calls auto_fill dry_run true.
+00:00:58,704 --> 00:01:01,956
+Center: the week board — dashed cards are
+open.
 
 21
-00:01:35,881 --> 00:01:39,652
-Deterministic, hardest-shift-first, with a one-level repair pass.
+00:01:01,956 --> 00:01:05,959
+Top: coverage, labour cost with overtime,
+and the publish gate.
 
 22
-00:01:39,652 --> 00:01:44,302
-Three strategies: balance hours, minimize cost, respect preferences.
+00:01:05,959 --> 00:01:10,069
+Right: compliance, cost breakdown, and the
+actor-tagged activity feed.
 
 23
-00:01:44,302 --> 00:01:50,828
-Dry run never mutates — it paints a “proposed by agent” preview with fills, unfilled, coverage and cost.
+00:01:10,177 --> 00:01:13,543
+We ship with seeded errors so the first
+agent call finds something real: Kofi
 
 24
-00:01:50,828 --> 00:01:54,621
-Preview and apply share the same code path, so the preview is honest.
+00:01:13,623 --> 00:01:16,909
+double-booked Thursday on bake and bar,
+Maya on a Sunday close against
 
 25
-00:01:54,721 --> 00:02:03,941
-Apply re-plans against live state so it never clobbers edits you made after the preview, writes only the planned shifts, logs actor agent, and is one-undo reversible.
+00:01:16,989 --> 00:01:20,275
+availability, plus coverage and lead
+warnings.
 
 26
+00:01:20,378 --> 00:01:24,322
+The agent calls check_compliance, then
+suggest_swaps to rank who can take
+
+27
+00:01:24,402 --> 00:01:28,267
+Thursday bar AM, then explain_assignment
+to preview blockers and caveats — all
+
+28
+00:01:28,347 --> 00:01:32,212
+computed by the same pure engine the UI
+uses, not guessed.
+
+29
+00:01:32,328 --> 00:01:35,881
+For the bulk fix it calls auto_fill
+dry_run true.
+
+30
+00:01:35,881 --> 00:01:39,652
+Deterministic, hardest-shift-first, with a
+one-level repair pass.
+
+31
+00:01:39,652 --> 00:01:44,302
+Three strategies: balance hours, minimize
+cost, respect preferences.
+
+32
+00:01:44,302 --> 00:01:47,564
+Dry run never mutates — it paints a
+“proposed by agent” preview with fills,
+
+33
+00:01:47,644 --> 00:01:50,828
+unfilled, coverage and cost.
+
+34
+00:01:50,828 --> 00:01:54,620
+Preview and apply share the same code
+path, so the preview is honest.
+
+35
+00:01:54,721 --> 00:01:57,794
+Apply re-plans against live state so it
+never clobbers edits you made after the
+
+36
+00:01:57,874 --> 00:02:00,867
+preview, writes only the planned shifts,
+logs actor agent, and is one-undo
+
+37
+00:02:00,947 --> 00:02:03,941
+reversible.
+
+38
 00:02:03,941 --> 00:02:05,402
 Locked shifts are skipped.
 
-27
-00:02:05,497 --> 00:02:08,668
-Publish gates on zero errors and a human modal.
+39
+00:02:05,496 --> 00:02:08,668
+Publish gates on zero errors and a human
+modal.
 
-28
+40
 00:02:08,668 --> 00:02:10,608
-The agent triggers it, you click Approve, the pill flips to published.
+The agent triggers it, you click Approve,
+the pill flips to published.
 
-29
+41
 00:02:10,608 --> 00:02:12,270
-The agent triggers it, you click Approve, the pill flips to published.
+The agent triggers it, you click Approve,
+the pill flips to published.
 
-30
-00:02:12,270 --> 00:02:15,701
+42
+00:02:12,270 --> 00:02:15,700
 CSV and ICS export are read-only tools.
 
-31
-00:02:15,818 --> 00:02:22,949
-Staff notes are wrapped between BEGIN UNTRUSTED and END markers — the tool description warns the agent not to follow instructions inside.
+43
+00:02:15,818 --> 00:02:19,383
+Staff notes are wrapped between BEGIN
+UNTRUSTED and END markers — the tool
 
-32
-00:02:22,949 --> 00:02:30,810
-We also set Origin-Agent-Cluster and Permissions-Policy, probe both document and navigator modelContext, and guard against double registration.
+44
+00:02:19,463 --> 00:02:22,949
+description warns the agent not to follow
+instructions inside.
 
-33
-00:02:30,914 --> 00:02:38,129
-Test it at wcrew dot pages dot dev — Chrome one-four-nine with enable-webmcp-testing, or ChatGPT’s in-app browser with the tool inspector.
+45
+00:02:22,949 --> 00:02:26,879
+We also set Origin-Agent-Cluster and
+Permissions-Policy, probe both document
 
-34
-00:02:38,129 --> 00:02:42,070
-Open source MIT at github dot com slash PhiBao slash wcrew.
+46
+00:02:26,959 --> 00:02:30,810
+and navigator modelContext, and guard
+against double registration.
 
-35
-00:02:42,070 --> 00:02:44,137
+47
+00:02:30,913 --> 00:02:34,521
+Test it at wcrew dot pages dot dev —
+Chrome one-four-nine with
+
+48
+00:02:34,601 --> 00:02:38,129
+enable-webmcp-testing, or ChatGPT’s in-app
+browser with the tool inspector.
+
+49
+00:02:38,128 --> 00:02:42,069
+Open source MIT at github dot com slash
+PhiBao slash wcrew.
+
+50
+00:02:42,069 --> 00:02:44,137
 Let the agent help you close the roster.
 
